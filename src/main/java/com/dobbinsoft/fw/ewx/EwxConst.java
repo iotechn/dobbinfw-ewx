@@ -19,6 +19,9 @@ public class EwxConst {
     public static final String USER_GET_USER_BY_EMAIL_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/user/get_userid_by_email?access_token=%s";
     public static final String USER_QR_LOGIN_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/user/getuserinfo?access_token=%s&code=%s";
     public static final String JS_CODE_TO_SESSION = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/miniprogram/jscode2session?access_token=%s&js_code=%s&grant_type=authorization_code";
-
+    public static final String ACCESS_TOKEN_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/gettoken?corpid=%s&corpsecret=%s";
+    public static final String DEPARTMENT_LIST_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/department/list?access_token=%s";
+    public static final String DEPARTMENT_SIMPLE_LIST_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/department/simplelist?access_token=%s";
+    public static final String DEPARTMENT__GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/department/get?access_token=%s&id=%s";
 
 }

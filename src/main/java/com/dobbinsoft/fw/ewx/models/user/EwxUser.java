@@ -49,5 +49,6 @@ public class EwxUser extends EwxBaseModel implements Serializable {
 	@JsonProperty("external_profile")
 	private EwxUserExternalProfile externalProfile;
 	private EwxUserExtraAttrs extattr;
+	private String ChangeType;
 
 }

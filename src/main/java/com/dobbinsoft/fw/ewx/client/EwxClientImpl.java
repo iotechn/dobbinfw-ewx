@@ -1,11 +1,14 @@
 package com.dobbinsoft.fw.ewx.client;
 
+import com.amazonaws.util.json.Jackson;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.ewx.EwxConst;
 import com.dobbinsoft.fw.ewx.cache.EwxCache;
 import com.dobbinsoft.fw.ewx.events.EwxEventProcessor;
 import com.dobbinsoft.fw.ewx.exception.EwxException;
 import com.dobbinsoft.fw.ewx.models.EwxAgent;
+import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentAttr;
+import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentListAttr;
 import com.dobbinsoft.fw.ewx.models.event.EwxEncryptMessageRequest;
 import com.dobbinsoft.fw.ewx.models.event.EwxUrlVerifyRequest;
 import com.dobbinsoft.fw.ewx.models.login.EwxMpLogin;
@@ -15,12 +18,15 @@ import com.dobbinsoft.fw.ewx.models.user.EwxUser;
 import com.dobbinsoft.fw.ewx.utils.WXBizMsgCrypt;
 import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.dobbinsoft.fw.support.utils.StringUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import netscape.javascript.JSObject;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Map;
@@ -28,7 +34,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-//@Component
 public class EwxClientImpl implements EwxClient {
 
     @Autowired
@@ -93,7 +98,7 @@ public class EwxClientImpl implements EwxClient {
         EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
         try {
             WXBizMsgCrypt wxBizMsgCrypt = new WXBizMsgCrypt(ewxAgent.getToken(), ewxAgent.getAesKey(), ewxAgent.getCorpId());
-            return wxBizMsgCrypt.verifyURL(request.getMsgSignature(), request.getTimestamp(), request.getNonce(),request.getEchostr());
+            return wxBizMsgCrypt.verifyURL(request.getMsgSignature(), request.getTimestamp(), request.getNonce(), request.getEchostr());
         } catch (ServiceException e) {
             log.error("[EWX] 验证回调URL异常 message={}, request={}", e.getMessage(), JacksonUtil.toJSONString(request));
             return e.getMessage();
@@ -172,4 +177,36 @@ public class EwxClientImpl implements EwxClient {
         return corpId + "---" + agentId;
     }
 
+    @Override
+    public EwxAccessToken getAccessToken(String corpId, String agentId, String corpSecret) {
+        EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
+        return proxyGet(EwxConst.ACCESS_TOKEN_GET_URL.formatted(corpId, corpSecret), ewxAgent, EwxAccessToken.class);
+    }
+
+    @Override
+    public EwxDepartmentListAttr getDepartmentList(String corpId, String agentId, String corpSecret, String deptId) {
+        EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
+        String url = EwxConst.DEPARTMENT_LIST_GET_URL.formatted(getEwxToken(corpId,corpSecret));
+        if (StringUtils.isNotEmpty(deptId)) {
+            url += "&id=" + deptId;
+        }
+        return proxyGet(url, ewxAgent, EwxDepartmentListAttr.class);
+    }
+
+    @Override
+    public EwxDepartmentListAttr getDepartmentSimpleList(String corpId, String agentId, String corpSecret, String deptId) {
+        EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
+        String url = EwxConst.DEPARTMENT_SIMPLE_LIST_GET_URL.formatted(getEwxToken(corpId,corpSecret));
+        if (StringUtils.isNotEmpty(deptId)) {
+            url += "&id=" + deptId;
+        }
+        return proxyGet(url, ewxAgent, EwxDepartmentListAttr.class);
+    }
+
+    @Override
+    public EwxDepartmentAttr getDepartment(String corpId, String agentId, String corpSecret, String deptId) {
+        EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
+        String url = EwxConst.DEPARTMENT__GET_URL.formatted(getEwxToken(corpId,corpSecret),deptId);
+        return proxyGet(url, ewxAgent, EwxDepartmentAttr.class);
+    }
 }

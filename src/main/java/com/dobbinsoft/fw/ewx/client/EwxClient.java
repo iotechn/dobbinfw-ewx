@@ -1,12 +1,15 @@
 package com.dobbinsoft.fw.ewx.client;
 
 import com.dobbinsoft.fw.ewx.models.EwxAgent;
+import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentAttr;
+import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentListAttr;
 import com.dobbinsoft.fw.ewx.models.event.EwxEncryptMessageRequest;
 import com.dobbinsoft.fw.ewx.models.event.EwxUrlVerifyRequest;
 import com.dobbinsoft.fw.ewx.models.login.EwxMpLogin;
 import com.dobbinsoft.fw.ewx.models.login.EwxQrLogin;
 import com.dobbinsoft.fw.ewx.models.token.EwxAccessToken;
 import com.dobbinsoft.fw.ewx.models.user.EwxUser;
+import netscape.javascript.JSObject;
 
 public interface EwxClient {
 
@@ -58,4 +61,41 @@ public interface EwxClient {
 
     public String routeEvent(String corpId, String agentId, EwxUrlVerifyRequest request, EwxEncryptMessageRequest encryptMessageRequest);
 
+    /**
+     * 获取access_token
+     * @param corpId 企业ID
+     * @param corpSecret 应用的凭证密钥
+     * @return
+     */
+    public EwxAccessToken getAccessToken(String corpId, String agentId, String corpSecret);
+
+    /**
+     * 获取部门列表
+     * @param corpId 企业ID
+     * @param agentId
+     * @param corpSecret 应用的凭证密钥
+     * @param deptId 部门id。获取指定部门及其下的子部门 如果不填，默认获取全量组织架构
+     * @return
+     */
+    public EwxDepartmentListAttr getDepartmentList(String corpId, String agentId, String corpSecret, String deptId);
+
+    /**
+     * 获取子部门ID列表
+     * @param corpId 企业ID
+     * @param agentId
+     * @param corpSecret 应用的凭证密钥
+     * @param deptId 部门id。获取指定部门及其下的子部门 如果不填，默认获取全量组织架构
+     * @return
+     */
+    public EwxDepartmentListAttr getDepartmentSimpleList(String corpId, String agentId, String corpSecret,String deptId);
+
+    /**
+     * 获取子部门ID列表
+     * @param corpId 企业ID
+     * @param agentId
+     * @param corpSecret 应用的凭证密钥
+     * @param deptId 部门id。获取指定部门及其下的子部门 如果不填，默认获取全量组织架构
+     * @return
+     */
+    public EwxDepartmentAttr getDepartment(String corpId, String agentId, String corpSecret, String deptId);
 }
