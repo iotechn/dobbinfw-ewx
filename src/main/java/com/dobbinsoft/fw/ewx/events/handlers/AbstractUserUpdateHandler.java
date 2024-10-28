@@ -33,7 +33,7 @@ public abstract class AbstractUserUpdateHandler implements EwxEventsHandler {
             if (ChangeTypeConst.CREATE_USER.equals(ChangeType)|| ChangeTypeConst.UPDATE_USER.equals(ChangeType)|| ChangeTypeConst.delete_user.equals(ChangeType)) {
                 //成员变更
                 // 获取UserId
-                String userId = Objects.isNull(ewxUserUpdateEvent) ? null : ewxUserUpdateEvent.getUserId();
+                String userId = ewxUserUpdateEvent.getUserId();
                 // 接到更新回调，直接查一次最新的用户
                 EwxUser user = ewxClient.getUser(cropId, agentId, userId);
                 latestEwxUser(user);
@@ -53,7 +53,7 @@ public abstract class AbstractUserUpdateHandler implements EwxEventsHandler {
         }
         //成员变更
         // 获取UserId
-        String userId = Objects.isNull(ewxUserUpdateEvent) ? null : ewxUserUpdateEvent.getUserId();
+        String userId = ewxUserUpdateEvent.getUserId();
         // 接到更新回调，直接查一次最新的用户
         EwxUser user = ewxClient.getUser(cropId, agentId, userId);
         latestEwxUser(user);

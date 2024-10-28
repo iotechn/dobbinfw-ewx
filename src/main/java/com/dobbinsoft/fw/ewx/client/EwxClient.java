@@ -8,7 +8,10 @@ import com.dobbinsoft.fw.ewx.models.event.EwxUrlVerifyRequest;
 import com.dobbinsoft.fw.ewx.models.login.EwxMpLogin;
 import com.dobbinsoft.fw.ewx.models.login.EwxQrLogin;
 import com.dobbinsoft.fw.ewx.models.token.EwxAccessToken;
+import com.dobbinsoft.fw.ewx.models.user.EwxExternalContactDetailAttr;
+import com.dobbinsoft.fw.ewx.models.user.EwxExternalContactIdAttr;
 import com.dobbinsoft.fw.ewx.models.user.EwxUser;
+import com.dobbinsoft.fw.ewx.models.user.EwxUserDetailAttr;
 import netscape.javascript.JSObject;
 
 public interface EwxClient {
@@ -77,7 +80,7 @@ public interface EwxClient {
      * @param deptId 部门id。获取指定部门及其下的子部门 如果不填，默认获取全量组织架构
      * @return
      */
-    public EwxDepartmentListAttr getDepartmentList(String corpId, String agentId, String corpSecret, String deptId);
+    public EwxDepartmentListAttr getDepartmentList(String corpId, Integer agentId, String corpSecret, Long deptId);
 
     /**
      * 获取子部门ID列表
@@ -87,7 +90,7 @@ public interface EwxClient {
      * @param deptId 部门id。获取指定部门及其下的子部门 如果不填，默认获取全量组织架构
      * @return
      */
-    public EwxDepartmentListAttr getDepartmentSimpleList(String corpId, String agentId, String corpSecret,String deptId);
+    public EwxDepartmentListAttr getDepartmentSimpleList(String corpId, Integer agentId, String corpSecret,Long deptId);
 
     /**
      * 获取子部门ID列表
@@ -97,5 +100,43 @@ public interface EwxClient {
      * @param deptId 部门id。获取指定部门及其下的子部门 如果不填，默认获取全量组织架构
      * @return
      */
-    public EwxDepartmentAttr getDepartment(String corpId, String agentId, String corpSecret, String deptId);
+    public EwxDepartmentAttr getDepartment(String corpId, Integer agentId, String corpSecret, Long deptId);
+
+
+    /**
+     * 获取部门成员详情
+     * @param corpId
+     * @param agentId
+     * @param corpSecret
+     * @param deptId 部门id
+     * @return
+     */
+    public EwxUserDetailAttr getUserListByDeptId(String corpId, Integer agentId, String corpSecret, Long deptId);
+
+
+    /**
+     * 获取客户列表
+     * @param corpId
+     * @param agentId
+     * @param corpSecret
+     * @param userId 企业成员的userid
+     * @return
+     */
+    public EwxExternalContactIdAttr getExternalContactList(String corpId, Integer agentId, String corpSecret, String  userId);
+
+    /**
+     * 批量获取客户详情
+     * @param corpId
+     * @param agentId
+     * @param corpSecret
+     * @param userId
+     * @param cursor
+     * @param limit
+     * @return
+     */
+    public EwxExternalContactDetailAttr getExternalContactDetailList(String corpId, Integer agentId, String corpSecret, String[]  userId, String cursor,int limit);
+
+
+
+
 }

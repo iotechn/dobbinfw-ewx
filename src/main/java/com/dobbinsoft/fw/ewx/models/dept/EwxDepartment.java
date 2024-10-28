@@ -12,7 +12,7 @@ public class EwxDepartment implements Serializable  {
     @Serial
     private static final long serialVersionUID = 3886834344306415181L;
 
-    private Integer id;
+    private Long id;
 
     private String name;
 
@@ -23,7 +23,7 @@ public class EwxDepartment implements Serializable  {
     private String[] departmentLeader;
 
     @JsonProperty("parentid")
-    private Integer parentid;
+    private Long parentid;
 
     private Integer order;
 }

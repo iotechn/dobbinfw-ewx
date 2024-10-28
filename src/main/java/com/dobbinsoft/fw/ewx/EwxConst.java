@@ -22,6 +22,9 @@ public class EwxConst {
     public static final String ACCESS_TOKEN_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/gettoken?corpid=%s&corpsecret=%s";
     public static final String DEPARTMENT_LIST_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/department/list?access_token=%s";
     public static final String DEPARTMENT_SIMPLE_LIST_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/department/simplelist?access_token=%s";
-    public static final String DEPARTMENT__GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/department/get?access_token=%s&id=%s";
+    public static final String DEPARTMENT_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/department/get?access_token=%s&id=%s";
+    public static final String DEPARTMENT_USER_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/user/list?access_token=%s&department_id=%s";
+    public static final String EXTERNAL_CONTACT_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/externalcontact/list?access_token=%s&userid=%s";
+    public static final String EXTERNAL_CONTACT_LIST_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/externalcontact/batch/get_by_user?access_token=%s";
 
 }
