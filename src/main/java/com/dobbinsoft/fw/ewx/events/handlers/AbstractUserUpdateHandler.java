@@ -43,7 +43,7 @@ public abstract class AbstractUserUpdateHandler implements EwxEventsHandler {
                 BeanUtils.copyProperties(ewxUserUpdateEvent, deptUpdateEvent);
                 latestEwxDept(deptUpdateEvent);
             }else {
-                //标签变革
+                //标签变更
                 EwxTagUpdateEvent ewxTagUpdateEvent = new EwxTagUpdateEvent();
                 BeanUtils.copyProperties(ewxUserUpdateEvent, ewxTagUpdateEvent);
                 latestTagDept(ewxTagUpdateEvent);
