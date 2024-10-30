@@ -15,4 +15,6 @@ public class EwxDepartmentAttr extends EwxBaseModel implements Serializable  {
 
     private EwxDepartment department;
 
+    private String  changeType;
+
 }

@@ -77,7 +77,7 @@ public class EwxUserUpdateEvent {
     private int status;
 
     @JsonProperty("Id")
-    private Integer id;
+    private Long id;
 
     @JsonProperty("ParentId")
     private Integer parentId;

@@ -186,7 +186,7 @@ public class EwxClientImpl implements EwxClient {
     }
 
     @Override
-    public EwxDepartmentListAttr getDepartmentList(String corpId, String agentId, String corpSecret, Long deptId) {
+    public EwxDepartmentListAttr getDepartmentList(String corpId, String agentId, Long deptId) {
         EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
         String url = EwxConst.DEPARTMENT_LIST_GET_URL.formatted(getEwxToken(corpId,agentId));
         if (Objects.nonNull(deptId)) {
@@ -196,7 +196,7 @@ public class EwxClientImpl implements EwxClient {
     }
 
     @Override
-    public EwxDepartmentListAttr getDepartmentSimpleList(String corpId, String agentId, String corpSecret, Long deptId) {
+    public EwxDepartmentListAttr getDepartmentSimpleList(String corpId, String agentId, Long deptId) {
         EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
         String url = EwxConst.DEPARTMENT_SIMPLE_LIST_GET_URL.formatted(getEwxToken(corpId,agentId));
         if (Objects.nonNull(deptId)) {
@@ -206,28 +206,28 @@ public class EwxClientImpl implements EwxClient {
     }
 
     @Override
-    public EwxDepartmentAttr getDepartment(String corpId, String agentId, String corpSecret, Long deptId) {
+    public EwxDepartmentAttr getDepartment(String corpId, String agentId, Long deptId) {
         EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
         String url = EwxConst.DEPARTMENT_GET_URL.formatted(getEwxToken(corpId,agentId),deptId);
         return proxyGet(url, ewxAgent, EwxDepartmentAttr.class);
     }
 
     @Override
-    public EwxUserDetailAttr getUserListByDeptId(String corpId, String agentId, String corpSecret, Long deptId) {
+    public EwxUserDetailAttr getUserListByDeptId(String corpId, String agentId, Long deptId) {
         EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
         String url = EwxConst.DEPARTMENT_USER_GET_URL.formatted(getEwxToken(corpId, agentId), deptId);
         return proxyGet(url, ewxAgent, EwxUserDetailAttr.class);
     }
 
     @Override
-    public EwxExternalContactIdAttr getExternalContactList(String corpId, String agentId, String corpSecret, String userId) {
+    public EwxExternalContactIdAttr getExternalContactList(String corpId, String agentId,  String userId) {
         EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
         String url=EwxConst.EXTERNAL_CONTACT_GET_URL.formatted(getEwxToken(corpId,agentId),userId);
         return proxyGet(url, ewxAgent, EwxExternalContactIdAttr.class);
     }
 
     @Override
-    public EwxExternalContactDetailAttr getExternalContactDetailList(String corpId, String agentId, String corpSecret, String[] userId, String cursor, int limit) {
+    public EwxExternalContactDetailAttr getExternalContactDetailList(String corpId, String agentId, String[] userId, String cursor, int limit) {
         EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
         String url=EwxConst.EXTERNAL_CONTACT_LIST_GET_URL.formatted(getEwxToken(corpId,agentId));
         EwxExternalRequest request = new EwxExternalRequest();

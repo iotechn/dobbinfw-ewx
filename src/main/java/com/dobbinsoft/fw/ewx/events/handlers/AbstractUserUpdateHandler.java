@@ -7,6 +7,7 @@ import com.dobbinsoft.fw.ewx.events.EwxEventsHandler;
 import com.dobbinsoft.fw.ewx.events.model.EwxDeptUpdateEvent;
 import com.dobbinsoft.fw.ewx.events.model.EwxTagUpdateEvent;
 import com.dobbinsoft.fw.ewx.events.model.EwxUserUpdateEvent;
+import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentAttr;
 import com.dobbinsoft.fw.ewx.models.user.EwxUser;
 import com.dobbinsoft.fw.support.utils.JacksonXmlUtil;
 import com.dobbinsoft.fw.support.utils.StringUtils;
@@ -28,7 +29,10 @@ public abstract class AbstractUserUpdateHandler implements EwxEventsHandler {
     @Override
     public void handle(String cropId, String agentId, String rawMessage) {
         EwxUserUpdateEvent ewxUserUpdateEvent = JacksonXmlUtil.parseObject(rawMessage, EwxUserUpdateEvent.class);
-        String ChangeType = Objects.isNull(ewxUserUpdateEvent.getChangeType()) ? null : ewxUserUpdateEvent.getChangeType();
+        if (Objects.isNull(ewxUserUpdateEvent)) {
+            return;
+        }
+        String ChangeType = ewxUserUpdateEvent.getChangeType();
         if (StringUtils.isNotBlank(ChangeType)) {
             if (ChangeTypeConst.CREATE_USER.equals(ChangeType)|| ChangeTypeConst.UPDATE_USER.equals(ChangeType)|| ChangeTypeConst.delete_user.equals(ChangeType)) {
                 //成员变更
@@ -38,10 +42,12 @@ public abstract class AbstractUserUpdateHandler implements EwxEventsHandler {
                 EwxUser user = ewxClient.getUser(cropId, agentId, userId);
                 latestEwxUser(user);
             }else if (ChangeTypeConst.create_party.equals(ChangeType)|| ChangeTypeConst.update_party.equals(ChangeType)|| ChangeTypeConst.delete_party.equals(ChangeType)) {
-                //部门变更
-                EwxDeptUpdateEvent deptUpdateEvent = new EwxDeptUpdateEvent();
-                BeanUtils.copyProperties(ewxUserUpdateEvent, deptUpdateEvent);
-                latestEwxDept(deptUpdateEvent);
+                //部门变更 获取部门详情
+                EwxDepartmentAttr departmentAttr = ewxClient.getDepartment(cropId, agentId, ewxUserUpdateEvent.getId());
+                if (Objects.nonNull(departmentAttr)){
+                    departmentAttr.setChangeType(ewxUserUpdateEvent.getChangeType());
+                }
+                latestEwxDept(departmentAttr);
             }else {
                 //标签变更
                 EwxTagUpdateEvent ewxTagUpdateEvent = new EwxTagUpdateEvent();
@@ -61,7 +67,7 @@ public abstract class AbstractUserUpdateHandler implements EwxEventsHandler {
 
     public abstract void latestEwxUser(EwxUser ewxUser);
 
-    public abstract void latestEwxDept(EwxDeptUpdateEvent ewxDeptUpdateEvent);
+    public abstract void latestEwxDept(EwxDepartmentAttr departmentAttr);
 
     public abstract void latestTagDept(EwxTagUpdateEvent ewxTagUpdateEvent);
 
