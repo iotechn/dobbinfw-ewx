@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
  * 需要手动import这个controller
  */
 @Slf4j
+@RestController
 @RequestMapping("/cb/ewx")
 public class EwxCallbackController {
 
