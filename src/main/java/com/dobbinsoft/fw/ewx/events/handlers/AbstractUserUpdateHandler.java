@@ -4,7 +4,6 @@ import com.dobbinsoft.fw.ewx.ChangeTypeConst;
 import com.dobbinsoft.fw.ewx.client.EwxClient;
 import com.dobbinsoft.fw.ewx.events.EwxEventType;
 import com.dobbinsoft.fw.ewx.events.EwxEventsHandler;
-import com.dobbinsoft.fw.ewx.events.model.EwxDeptUpdateEvent;
 import com.dobbinsoft.fw.ewx.events.model.EwxTagUpdateEvent;
 import com.dobbinsoft.fw.ewx.events.model.EwxUserUpdateEvent;
 import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentAttr;
