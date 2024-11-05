@@ -1,6 +1,5 @@
 package com.dobbinsoft.fw.ewx.client;
 
-import com.amazonaws.util.json.Jackson;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.ewx.EwxConst;
 import com.dobbinsoft.fw.ewx.cache.EwxCache;
@@ -18,16 +17,12 @@ import com.dobbinsoft.fw.ewx.models.user.*;
 import com.dobbinsoft.fw.ewx.utils.WXBizMsgCrypt;
 import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.dobbinsoft.fw.support.utils.StringUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import netscape.javascript.JSObject;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.serializer.JacksonObjectWriter;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -188,7 +183,7 @@ public class EwxClientImpl implements EwxClient {
     @Override
     public EwxDepartmentListAttr getDepartmentList(String corpId, String agentId, Long deptId) {
         EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
-        String url = EwxConst.DEPARTMENT_LIST_GET_URL.formatted(getEwxToken(corpId,agentId));
+        String url = EwxConst.DEPARTMENT_LIST_GET_URL.formatted(getEwxToken(corpId,agentId).getAccessToken());
         if (Objects.nonNull(deptId)) {
             url += "&id=" + deptId;
         }
@@ -198,7 +193,7 @@ public class EwxClientImpl implements EwxClient {
     @Override
     public EwxDepartmentListAttr getDepartmentSimpleList(String corpId, String agentId, Long deptId) {
         EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
-        String url = EwxConst.DEPARTMENT_SIMPLE_LIST_GET_URL.formatted(getEwxToken(corpId,agentId));
+        String url = EwxConst.DEPARTMENT_SIMPLE_LIST_GET_URL.formatted(getEwxToken(corpId,agentId).getAccessToken());
         if (Objects.nonNull(deptId)) {
             url += "&id=" + deptId;
         }
@@ -208,28 +203,28 @@ public class EwxClientImpl implements EwxClient {
     @Override
     public EwxDepartmentAttr getDepartment(String corpId, String agentId, Long deptId) {
         EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
-        String url = EwxConst.DEPARTMENT_GET_URL.formatted(getEwxToken(corpId,agentId),deptId);
+        String url = EwxConst.DEPARTMENT_GET_URL.formatted(getEwxToken(corpId,agentId).getAccessToken(),deptId);
         return proxyGet(url, ewxAgent, EwxDepartmentAttr.class);
     }
 
     @Override
     public EwxUserDetailAttr getUserListByDeptId(String corpId, String agentId, Long deptId) {
         EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
-        String url = EwxConst.DEPARTMENT_USER_GET_URL.formatted(getEwxToken(corpId, agentId), deptId);
+        String url = EwxConst.DEPARTMENT_USER_GET_URL.formatted(getEwxToken(corpId, agentId).getAccessToken(), deptId);
         return proxyGet(url, ewxAgent, EwxUserDetailAttr.class);
     }
 
     @Override
     public EwxExternalContactIdAttr getExternalContactList(String corpId, String agentId,  String userId) {
         EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
-        String url=EwxConst.EXTERNAL_CONTACT_GET_URL.formatted(getEwxToken(corpId,agentId),userId);
+        String url=EwxConst.EXTERNAL_CONTACT_GET_URL.formatted(getEwxToken(corpId,agentId).getAccessToken(),userId);
         return proxyGet(url, ewxAgent, EwxExternalContactIdAttr.class);
     }
 
     @Override
     public EwxExternalContactDetailAttr getExternalContactDetailList(String corpId, String agentId, String[] userId, String cursor, int limit) {
         EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
-        String url=EwxConst.EXTERNAL_CONTACT_LIST_GET_URL.formatted(getEwxToken(corpId,agentId));
+        String url=EwxConst.EXTERNAL_CONTACT_LIST_GET_URL.formatted(getEwxToken(corpId,agentId).getAccessToken());
         EwxExternalRequest request = new EwxExternalRequest();
         request.setUserid_list(Arrays.asList(userId));
         request.setCursor(cursor);

@@ -39,7 +39,7 @@ public class EwxExternalContactDetailAttr extends EwxBaseModel implements Serial
             @JsonProperty("corp_full_name")
             private String corpFullName;
             private int type;
-            private int gender;
+            private Integer gender;
             @JsonProperty("unionid")
             private String unionId;
             @JsonProperty("external_profile")

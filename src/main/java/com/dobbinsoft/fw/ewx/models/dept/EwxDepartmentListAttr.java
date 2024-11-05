@@ -12,5 +12,5 @@ public class EwxDepartmentListAttr extends EwxBaseModel implements Serializable 
     @Serial
     private static final long serialVersionUID = 3886834344306415181L;
 
-    private List<EwxDepartment> departments;
+    private List<EwxDepartment> department;
 }
