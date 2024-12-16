@@ -81,7 +81,7 @@ public class EwxClientImpl implements EwxClient {
     @Override
     public EwxMpLogin mpLogin(String corpId, String agentId, String code) {
         EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
-        return proxyGet(EwxConst.JS_CODE_TO_SESSION.formatted(ewxAgent, code), ewxAgent, EwxMpLogin.class);
+        return proxyGet(EwxConst.JS_CODE_TO_SESSION.formatted(getEwxToken(corpId, agentId).getAccessToken(), code), ewxAgent, EwxMpLogin.class);
     }
 
     @Override

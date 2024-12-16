@@ -31,7 +31,7 @@ public class EwxUserDetail implements Serializable {
     private String mobile;
 
     @JsonProperty("gender")
-    private String gender;
+    private Integer gender;
 
     @JsonProperty("email")
     private String email;
