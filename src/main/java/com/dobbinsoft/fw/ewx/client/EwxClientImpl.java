@@ -12,6 +12,9 @@ import com.dobbinsoft.fw.ewx.models.event.EwxEncryptMessageRequest;
 import com.dobbinsoft.fw.ewx.models.event.EwxUrlVerifyRequest;
 import com.dobbinsoft.fw.ewx.models.login.EwxMpLogin;
 import com.dobbinsoft.fw.ewx.models.login.EwxQrLogin;
+import com.dobbinsoft.fw.ewx.models.message.EwxEnterpriseMessageAttr;
+import com.dobbinsoft.fw.ewx.models.message.EwxEnterpriseMessageRequest;
+import com.dobbinsoft.fw.ewx.models.tag.EwxCorpTagAttr;
 import com.dobbinsoft.fw.ewx.models.token.EwxAccessToken;
 import com.dobbinsoft.fw.ewx.models.user.*;
 import com.dobbinsoft.fw.ewx.utils.WXBizMsgCrypt;
@@ -26,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -230,5 +234,20 @@ public class EwxClientImpl implements EwxClient {
         request.setCursor(cursor);
         request.setLimit(limit);
         return proxyPost(url,ewxAgent,request,EwxExternalContactDetailAttr.class);
+    }
+
+
+    @Override
+    public EwxCorpTagAttr getCorpTagList(String corpId, String agentId, Map<String, List<String>> data) {
+        EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
+        String url=EwxConst.CORP_TAG_LIST_GET_URL.formatted(getEwxToken(corpId,agentId).getAccessToken());
+        return proxyPost(url,ewxAgent,data,EwxCorpTagAttr.class);
+    }
+
+    @Override
+    public EwxEnterpriseMessageAttr createGroupMessage(String corpId, String agentId, EwxEnterpriseMessageRequest request) {
+        EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
+        String url=EwxConst.ADD_MSG_TEMPLATE_URL.formatted(getEwxToken(corpId,agentId).getAccessToken());
+        return proxyPost(url,ewxAgent,request,EwxEnterpriseMessageAttr.class);
     }
 }

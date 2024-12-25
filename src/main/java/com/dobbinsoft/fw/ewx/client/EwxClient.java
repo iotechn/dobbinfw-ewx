@@ -7,12 +7,18 @@ import com.dobbinsoft.fw.ewx.models.event.EwxEncryptMessageRequest;
 import com.dobbinsoft.fw.ewx.models.event.EwxUrlVerifyRequest;
 import com.dobbinsoft.fw.ewx.models.login.EwxMpLogin;
 import com.dobbinsoft.fw.ewx.models.login.EwxQrLogin;
+import com.dobbinsoft.fw.ewx.models.message.EwxEnterpriseMessageAttr;
+import com.dobbinsoft.fw.ewx.models.message.EwxEnterpriseMessageRequest;
+import com.dobbinsoft.fw.ewx.models.tag.EwxCorpTagAttr;
 import com.dobbinsoft.fw.ewx.models.token.EwxAccessToken;
 import com.dobbinsoft.fw.ewx.models.user.EwxExternalContactDetailAttr;
 import com.dobbinsoft.fw.ewx.models.user.EwxExternalContactIdAttr;
 import com.dobbinsoft.fw.ewx.models.user.EwxUser;
 import com.dobbinsoft.fw.ewx.models.user.EwxUserDetailAttr;
 import netscape.javascript.JSObject;
+
+import java.util.List;
+import java.util.Map;
 
 public interface EwxClient {
 
@@ -129,6 +135,24 @@ public interface EwxClient {
      * @return
      */
     public EwxExternalContactDetailAttr getExternalContactDetailList(String corpId, String agentId,  String[]  userId, String cursor,int limit);
+
+
+    /**
+     * 获取所有标签
+     * @param corpId
+     * @param agentId
+     * @param data
+     */
+    EwxCorpTagAttr getCorpTagList(String corpId, String agentId, Map<String, List<String>> data);
+
+    /**
+     * 创建企业群发消息
+     * @param corpId
+     * @param agentId
+     * @param request 请求体
+     * @return
+     */
+    EwxEnterpriseMessageAttr createGroupMessage(String corpId, String agentId, EwxEnterpriseMessageRequest request);
 
 
 
