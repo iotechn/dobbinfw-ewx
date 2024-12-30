@@ -1,6 +1,8 @@
 package com.dobbinsoft.fw.ewx.client;
 
+import com.dobbinsoft.fw.ewx.enums.EwxCorpSecretEnum;
 import com.dobbinsoft.fw.ewx.models.EwxAgent;
+import com.dobbinsoft.fw.ewx.models.EwxCorp;
 import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentAttr;
 import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentListAttr;
 import com.dobbinsoft.fw.ewx.models.event.EwxEncryptMessageRequest;
@@ -15,12 +17,13 @@ import com.dobbinsoft.fw.ewx.models.user.EwxExternalContactDetailAttr;
 import com.dobbinsoft.fw.ewx.models.user.EwxExternalContactIdAttr;
 import com.dobbinsoft.fw.ewx.models.user.EwxUser;
 import com.dobbinsoft.fw.ewx.models.user.EwxUserDetailAttr;
-import netscape.javascript.JSObject;
 
 import java.util.List;
 import java.util.Map;
 
 public interface EwxClient {
+
+    void addCorp(EwxCorp corp);
 
     void addAgent(EwxAgent agent);
 
@@ -60,7 +63,7 @@ public interface EwxClient {
     public EwxUser getUser(String corpId, String agentId, String userId);
 
     /**
-     * 校验回调URL
+     * 校验AGENT回调URL
      * @param corpId
      * @param agentId
      * @param request
@@ -68,7 +71,36 @@ public interface EwxClient {
      */
     public String verifyNotifyUrl(String corpId, String agentId, EwxUrlVerifyRequest request);
 
+    /**
+     * 将Agent 回调消息路由到某个Agent上
+     * @param corpId
+     * @param agentId
+     * @param request
+     * @param encryptMessageRequest
+     * @return
+     */
     public String routeEvent(String corpId, String agentId, EwxUrlVerifyRequest request, EwxEncryptMessageRequest encryptMessageRequest);
+
+
+    /**
+     * 校验CORP回调URL
+     * @param corpId
+     * @param secretEnum
+     * @param request
+     * @return
+     */
+    public String verifyCorpNotifyUrl(String corpId, EwxCorpSecretEnum secretEnum, EwxUrlVerifyRequest request);
+
+    /**
+     * 将Corp 回调消息路由到某个Corp上
+     * @param corpId
+     * @param secretEnum
+     * @param request
+     * @param encryptMessageRequest
+     * @return
+     */
+    public String routeCorpEvent(String corpId, EwxCorpSecretEnum secretEnum, EwxUrlVerifyRequest request, EwxEncryptMessageRequest encryptMessageRequest);
+
 
     /**
      * 获取access_token
@@ -155,6 +187,14 @@ public interface EwxClient {
     EwxEnterpriseMessageAttr createGroupMessage(String corpId, String agentId, EwxEnterpriseMessageRequest request);
 
 
+    /**
+     * 获取归档消息
+     * @param corpId
+     * @param seq
+     * @param limit
+     * @param timeout
+     */
+    void getArchiveMsg(String corpId, int seq, int limit, int timeout);
 
 
 }

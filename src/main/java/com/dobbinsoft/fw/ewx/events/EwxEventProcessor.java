@@ -1,6 +1,7 @@
 package com.dobbinsoft.fw.ewx.events;
 
 import com.dobbinsoft.fw.core.enums.BaseEnums;
+import com.dobbinsoft.fw.ewx.enums.EwxCorpSecretEnum;
 import com.dobbinsoft.fw.ewx.events.model.EwxEventModel;
 import com.dobbinsoft.fw.support.utils.JacksonXmlUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,13 @@ public class EwxEventProcessor {
         });
     }
 
+    /**
+     *
+     * @param corpId
+     * @param agentId 当为企业事件时，此字段为空
+     * @param requestBody
+     * @return
+     */
     public String process(String corpId, String agentId, String requestBody) {
         EwxEventModel ewxEventModel = JacksonXmlUtil.parseObject(requestBody, EwxEventModel.class);
         if (ewxEventModel == null) {
@@ -37,7 +45,6 @@ public class EwxEventProcessor {
             routeEvent(corpId, agentId, eventType, requestBody);
             return "success";
         }
-
         return "not event";
     }
 

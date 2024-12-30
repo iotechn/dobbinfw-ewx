@@ -10,7 +10,7 @@ public class AbstractCustomerMessageHandler implements EwxEventsHandler {
     }
 
     @Override
-    public void handle(String cropId, String agentId, String rawMessage) {
+    public void handle(String corpId, String agentId, String rawMessage) {
         //TODO
     }
 }

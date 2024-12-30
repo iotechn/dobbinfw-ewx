@@ -26,7 +26,7 @@ public abstract class AbstractUserUpdateHandler implements EwxEventsHandler {
     }
 
     @Override
-    public void handle(String cropId, String agentId, String rawMessage) {
+    public void handle(String corpId, String agentId, String rawMessage) {
         EwxUserUpdateEvent ewxUserUpdateEvent = JacksonXmlUtil.parseObject(rawMessage, EwxUserUpdateEvent.class);
         if (Objects.isNull(ewxUserUpdateEvent)) {
             return;
@@ -38,11 +38,11 @@ public abstract class AbstractUserUpdateHandler implements EwxEventsHandler {
                 // 获取UserId
                 String userId = ewxUserUpdateEvent.getUserId();
                 // 接到更新回调，直接查一次最新的用户
-                EwxUser user = ewxClient.getUser(cropId, agentId, userId);
+                EwxUser user = ewxClient.getUser(corpId, agentId, userId);
                 latestEwxUser(user);
             }else if (ChangeTypeConst.create_party.equals(ChangeType)|| ChangeTypeConst.update_party.equals(ChangeType)|| ChangeTypeConst.delete_party.equals(ChangeType)) {
                 //部门变更 获取部门详情
-                EwxDepartmentAttr departmentAttr = ewxClient.getDepartment(cropId, agentId, ewxUserUpdateEvent.getId());
+                EwxDepartmentAttr departmentAttr = ewxClient.getDepartment(corpId, agentId, ewxUserUpdateEvent.getId());
                 if (Objects.nonNull(departmentAttr)){
                     departmentAttr.setChangeType(ewxUserUpdateEvent.getChangeType());
                 }
@@ -60,7 +60,7 @@ public abstract class AbstractUserUpdateHandler implements EwxEventsHandler {
         // 获取UserId
         String userId = ewxUserUpdateEvent.getUserId();
         // 接到更新回调，直接查一次最新的用户
-        EwxUser user = ewxClient.getUser(cropId, agentId, userId);
+        EwxUser user = ewxClient.getUser(corpId, agentId, userId);
         latestEwxUser(user);
     }
 
