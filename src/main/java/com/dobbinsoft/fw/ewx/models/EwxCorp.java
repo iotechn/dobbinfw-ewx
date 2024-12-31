@@ -10,8 +10,10 @@ public interface EwxCorp {
 
     String getArchiveAesKey();
 
-    long getArchiveSdk();
+    String getArchivePrivateKey();
 
-    void setArchiveSdk(long sdk);
+    public default String archiveSdkKey() {
+        return getCorpId() + "---" + getArchiveSecret();
+    }
 
 }

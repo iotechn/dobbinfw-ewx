@@ -156,7 +156,7 @@ public class WXBizMsgCrypt {
 	 * @throws ServiceException
 	 *             执行失败，请查看该异常的错误码和具体的错误信息
 	 */
-	public String verifyURL(String msgSignature, String timeStamp, String nonce, String echoStr) throws ServiceException {
+	public String verifyAndDecrypt(String msgSignature, String timeStamp, String nonce, String echoStr) throws ServiceException {
 		String data = generateDataFromValues(token, timeStamp, nonce, echoStr);
 		String signature = org.apache.commons.codec.digest.DigestUtils.sha1Hex(data);
 
@@ -169,11 +169,11 @@ public class WXBizMsgCrypt {
 
 	private static String generateDataFromValues(String... list) {
 		Arrays.sort(list);
-		String result = "";
+		StringBuilder result = new StringBuilder();
 		for (String v : list) {
-			result += v;
+			result.append(v);
 		}
-		return result;
+		return result.toString();
 	}
 
 }

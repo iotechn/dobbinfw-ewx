@@ -1,17 +1,13 @@
 package com.dobbinsoft.fw.ewx.client;
 
-import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.ewx.EwxConst;
 import com.dobbinsoft.fw.ewx.cache.EwxCache;
-import com.dobbinsoft.fw.ewx.enums.EwxCorpSecretEnum;
-import com.dobbinsoft.fw.ewx.events.EwxEventProcessor;
 import com.dobbinsoft.fw.ewx.exception.EwxException;
 import com.dobbinsoft.fw.ewx.models.EwxAgent;
 import com.dobbinsoft.fw.ewx.models.EwxCorp;
+import com.dobbinsoft.fw.ewx.models.archive.*;
 import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentAttr;
 import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentListAttr;
-import com.dobbinsoft.fw.ewx.models.event.EwxEncryptMessageRequest;
-import com.dobbinsoft.fw.ewx.models.event.EwxUrlVerifyRequest;
 import com.dobbinsoft.fw.ewx.models.login.EwxMpLogin;
 import com.dobbinsoft.fw.ewx.models.login.EwxQrLogin;
 import com.dobbinsoft.fw.ewx.models.message.EwxEnterpriseMessageAttr;
@@ -19,9 +15,11 @@ import com.dobbinsoft.fw.ewx.models.message.EwxEnterpriseMessageRequest;
 import com.dobbinsoft.fw.ewx.models.tag.EwxCorpTagAttr;
 import com.dobbinsoft.fw.ewx.models.token.EwxAccessToken;
 import com.dobbinsoft.fw.ewx.models.user.*;
-import com.dobbinsoft.fw.ewx.utils.WXBizMsgCrypt;
+import com.dobbinsoft.fw.ewx.utils.RSAEncrypt;
+import com.dobbinsoft.fw.support.utils.CollectionUtils;
 import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.dobbinsoft.fw.support.utils.StringUtils;
+import com.tencent.wework.Finance;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -30,10 +28,7 @@ import okhttp3.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -42,15 +37,14 @@ public class EwxClientImpl implements EwxClient {
     @Autowired
     private EwxCache ewxCache;
 
-    @Autowired
-    private EwxEventProcessor ewxEventProcessor;
-
     private final OkHttpClient okHttpClient = new OkHttpClient();
 
     // Key corpId + "---" + agentId
     private final Map<String, EwxAgent> agentMap = new ConcurrentHashMap<>();
     // Key corpId
     private final Map<String, EwxCorp> corpMap = new ConcurrentHashMap<>();
+    // Key corpId + "---" + archiveSecret, value: sdk id
+    private final Map<String, Long> archiveSdkMap = new ConcurrentHashMap<>();
 
 
     @Override
@@ -61,6 +55,16 @@ public class EwxClientImpl implements EwxClient {
     @Override
     public void addAgent(EwxAgent agent) {
         agentMap.put(agent.cacheKey(), agent);
+    }
+
+    @Override
+    public EwxCorp getCorp(String corpId) {
+        return corpMap.get(corpId);
+    }
+
+    @Override
+    public EwxAgent getAgent(String corpId, String agentId) {
+        return agentMap.get(concatCacheKey(corpId, agentId));
     }
 
     @Override
@@ -102,77 +106,6 @@ public class EwxClientImpl implements EwxClient {
     public EwxUser getUser(String corpId, String agentId, String userId) {
         EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
         return proxyGet(EwxConst.USER_GET_URL.formatted(ewxAgent, userId), ewxAgent, EwxUser.class);
-    }
-
-    @Override
-    public String verifyNotifyUrl(String corpId, String agentId, EwxUrlVerifyRequest request) {
-        EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
-        try {
-            WXBizMsgCrypt wxBizMsgCrypt = new WXBizMsgCrypt(ewxAgent.getToken(), ewxAgent.getAesKey(), ewxAgent.getCorpId());
-            return wxBizMsgCrypt.verifyURL(request.getMsgSignature(), request.getTimestamp(), request.getNonce(), request.getEchostr());
-        } catch (ServiceException e) {
-            log.error("[EWX] 验证回调URL异常 message={}, request={}", e.getMessage(), JacksonUtil.toJSONString(request));
-            return e.getMessage();
-        }
-    }
-
-    @Override
-    public String routeEvent(String corpId, String agentId, EwxUrlVerifyRequest request, EwxEncryptMessageRequest encryptMessageRequest) {
-        EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
-        try {
-            WXBizMsgCrypt wxBizMsgCrypt = new WXBizMsgCrypt(ewxAgent.getToken(), ewxAgent.getAesKey(), ewxAgent.getCorpId());
-            String decryptXmlRequest = wxBizMsgCrypt.verifyURL(request.getMsgSignature(), request.getTimestamp(), request.getNonce(), request.getEchostr());
-            log.info("[EWX] 回调请求报文 request={}", decryptXmlRequest);
-            return ewxEventProcessor.process(corpId, agentId, decryptXmlRequest);
-        } catch (ServiceException e) {
-            log.error("[EWX] 回调请求报文 异常 message={}, request={}", e.getMessage(), JacksonUtil.toJSONString(request));
-            return e.getMessage();
-        }
-    }
-
-    @Override
-    public String verifyCorpNotifyUrl(String corpId, EwxCorpSecretEnum secretEnum, EwxUrlVerifyRequest request) {
-        EwxCorp ewxCorp = corpMap.get(corpId);
-        String token;
-        String aesKey;
-        if (secretEnum == EwxCorpSecretEnum.ARCHIVE) {
-            token = ewxCorp.getArchiveToken();
-            aesKey = ewxCorp.getArchiveAesKey();
-        } else {
-            // 此代码不可能执行
-            throw new RuntimeException("不支持的secret类型");
-        }
-        try {
-            WXBizMsgCrypt wxBizMsgCrypt = new WXBizMsgCrypt(token, aesKey, corpId);
-            return wxBizMsgCrypt.verifyURL(request.getMsgSignature(), request.getTimestamp(), request.getNonce(), request.getEchostr());
-        } catch (ServiceException e) {
-            log.error("[EWX] 验证回调URL异常 message={}, secretEnum={}, request={}", e.getMessage(), secretEnum.name(), JacksonUtil.toJSONString(request));
-            return e.getMessage();
-        }
-
-    }
-
-    @Override
-    public String routeCorpEvent(String corpId, EwxCorpSecretEnum secretEnum, EwxUrlVerifyRequest request, EwxEncryptMessageRequest encryptMessageRequest) {
-        EwxCorp ewxCorp = corpMap.get(corpId);
-        String token;
-        String aesKey;
-        if (secretEnum == EwxCorpSecretEnum.ARCHIVE) {
-            token = ewxCorp.getArchiveToken();
-            aesKey = ewxCorp.getArchiveAesKey();
-        } else {
-            // 此代码不可能执行
-            throw new RuntimeException("不支持的secret类型");
-        }
-        try {
-            WXBizMsgCrypt wxBizMsgCrypt = new WXBizMsgCrypt(token, aesKey, corpId);
-            String decryptXmlRequest = wxBizMsgCrypt.verifyURL(request.getMsgSignature(), request.getTimestamp(), request.getNonce(), request.getEchostr());
-            log.info("[EWX] 回调请求报文 request={}", decryptXmlRequest);
-            return ewxEventProcessor.process(corpId, null, decryptXmlRequest);
-        } catch (ServiceException e) {
-            log.error("[EWX] 回调请求报文 异常 message={}, request={}", e.getMessage(), JacksonUtil.toJSONString(request));
-            return e.getMessage();
-        }
     }
 
 
@@ -308,20 +241,23 @@ public class EwxClientImpl implements EwxClient {
 
 
     @Override
-    public void getArchiveMsg(String corpId, int seq, int limit, int timeout) {
+    public List<EwxArchiveMsgBase> getArchiveMsg(String corpId, int seq, int limit, int timeout) {
         EwxCorp ewxCorp = corpMap.get(corpId);
         if (StringUtils.isEmpty(ewxCorp.getArchiveSecret())) {
             log.info("[EWX] 会话归档拉取 未配置SDK Secret");
-            return;
+            return Collections.emptyList();
         }
-        long archiveSdk = ewxCorp.getArchiveSdk();
-        if (archiveSdk == 0) {
+        Long archiveSdk = archiveSdkMap.get(ewxCorp.archiveSdkKey());
+        if (archiveSdk == null) {
             synchronized (this) {
                 // DCL 防止重复初始化Sdk
-                if (ewxCorp.getArchiveSdk() == 0) {
+                Long tmp = archiveSdkMap.get(ewxCorp.archiveSdkKey());
+                if (tmp == null) {
                     archiveSdk = Finance.NewSdk();
                     Finance.Init(archiveSdk, ewxCorp.getCorpId(), ewxCorp.getArchiveSecret());
-                    ewxCorp.setArchiveSdk(archiveSdk);
+                    archiveSdkMap.put(ewxCorp.archiveSdkKey(), archiveSdk);
+                } else {
+                    archiveSdk = tmp;
                 }
             }
         }
@@ -332,11 +268,71 @@ public class EwxClientImpl implements EwxClient {
             int ret = Finance.GetChatData(archiveSdk, seq, limit, "", "", timeout, slice);
             if (ret != 0) {
                 log.info("[EWX] 会话归档拉取 解析slice失败 slice={}", slice);
-                return;
+                return Collections.emptyList();
             }
-            String result = Finance.GetContentFromSlice(slice);
-            log.info("[EWX] 会话归档拉取 data={}", result);
-            // 反序列化
+            String rawData = Finance.GetContentFromSlice(slice);
+            EwxArchiveRawData ewxArchiveRawData = JacksonUtil.parseObject(rawData, EwxArchiveRawData.class);
+            if (ewxArchiveRawData.getErrcode() != 0) {
+                log.info("[EWX] 会话归档拉取 error response={}", rawData);
+                return Collections.emptyList();
+            }
+            List<EwxArchiveRawData.ChatdataDTO> chatDataList = ewxArchiveRawData.getChatdata();
+            if (CollectionUtils.isEmpty(chatDataList)) {
+                return Collections.emptyList();
+            }
+            List<EwxArchiveMsgBase> result = new ArrayList<>();
+            int failCount = 0;
+            for (EwxArchiveRawData.ChatdataDTO chatData : chatDataList) {
+                String encryptRandomKey = chatData.getEncryptRandomKey();
+                String encryptChatMsg = chatData.getEncryptChatMsg();
+                long msg = Finance.NewSlice();
+
+                try {
+                    String decryptRandomKey = RSAEncrypt.decryptRSA(encryptRandomKey, ewxCorp.getArchivePrivateKey());
+                    if (StringUtils.isEmpty(decryptRandomKey)) {
+                        log.error("[EWX] 会话归档拉取 单条解密失败 encryptRandomKey:{}", encryptRandomKey);
+                        failCount++;
+                        continue;
+                    }
+                    ret = Finance.DecryptData(archiveSdk, decryptRandomKey, encryptChatMsg, msg);
+                    if (ret != 0) {
+                        log.error("[EWX] 会话归档拉取 单条error ret:{}", ret);
+                        failCount++;
+                        continue;
+                    }
+                    String plaintext = Finance.GetContentFromSlice(msg);
+                    log.info("[EWX] 会话归档拉取 plaintext={}", plaintext);
+                    EwxArchiveMsgBase ewxArchiveMsgBase = JacksonUtil.parseObject(plaintext, EwxArchiveMsgBase.class);
+                    switch (ewxArchiveMsgBase.getMsgtype()) {
+                        case "text" -> {
+                            EwxArchiveMsgText ewxArchiveMsgText = JacksonUtil.parseObject(plaintext, EwxArchiveMsgText.class);
+                            result.add(ewxArchiveMsgText);
+                        }
+                        case "image" -> {
+                            EwxArchiveMsgImage ewxArchiveMsgImage = JacksonUtil.parseObject(plaintext, EwxArchiveMsgImage.class);
+                            result.add(ewxArchiveMsgImage);
+                        }
+                        case "voice" -> {
+                            EwxArchiveMsgVoice ewxArchiveMsgVoice = JacksonUtil.parseObject(plaintext, EwxArchiveMsgVoice.class);
+                            result.add(ewxArchiveMsgVoice);
+                        }
+                        case "video" -> {
+                            EwxArchiveMsgVideo ewxArchiveMsgVideo = JacksonUtil.parseObject(plaintext, EwxArchiveMsgVideo.class);
+                            result.add(ewxArchiveMsgVideo);
+                        }
+                        case "location" -> {
+                            EwxArchiveMsgLocation ewxArchiveMsgLocation = JacksonUtil.parseObject(plaintext, EwxArchiveMsgLocation.class);
+                            result.add(ewxArchiveMsgLocation);
+                        }
+                        case null, default ->
+                                log.info("[EWX] 会话归档拉取 不支持的消息类型 MsgType={}", ewxArchiveMsgBase.getMsgtype());
+                    }
+                } finally {
+                    Finance.FreeSlice(msg);
+                }
+            }
+            log.info("[EWX] 会话归档拉取 success={}条, fail={}条", result.size(), failCount);
+            return result;
         } finally {
             // 保证NewSlice成对
             Finance.FreeSlice(slice);

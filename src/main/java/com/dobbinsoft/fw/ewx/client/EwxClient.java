@@ -1,12 +1,10 @@
 package com.dobbinsoft.fw.ewx.client;
 
-import com.dobbinsoft.fw.ewx.enums.EwxCorpSecretEnum;
 import com.dobbinsoft.fw.ewx.models.EwxAgent;
 import com.dobbinsoft.fw.ewx.models.EwxCorp;
+import com.dobbinsoft.fw.ewx.models.archive.EwxArchiveMsgBase;
 import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentAttr;
 import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentListAttr;
-import com.dobbinsoft.fw.ewx.models.event.EwxEncryptMessageRequest;
-import com.dobbinsoft.fw.ewx.models.event.EwxUrlVerifyRequest;
 import com.dobbinsoft.fw.ewx.models.login.EwxMpLogin;
 import com.dobbinsoft.fw.ewx.models.login.EwxQrLogin;
 import com.dobbinsoft.fw.ewx.models.message.EwxEnterpriseMessageAttr;
@@ -26,6 +24,10 @@ public interface EwxClient {
     void addCorp(EwxCorp corp);
 
     void addAgent(EwxAgent agent);
+
+    EwxCorp getCorp(String corpId);
+
+    EwxAgent getAgent(String corpId, String agentId);
 
     /**
      * 获取Agent访问凭证
@@ -61,45 +63,6 @@ public interface EwxClient {
      * @return
      */
     public EwxUser getUser(String corpId, String agentId, String userId);
-
-    /**
-     * 校验AGENT回调URL
-     * @param corpId
-     * @param agentId
-     * @param request
-     * @return
-     */
-    public String verifyNotifyUrl(String corpId, String agentId, EwxUrlVerifyRequest request);
-
-    /**
-     * 将Agent 回调消息路由到某个Agent上
-     * @param corpId
-     * @param agentId
-     * @param request
-     * @param encryptMessageRequest
-     * @return
-     */
-    public String routeEvent(String corpId, String agentId, EwxUrlVerifyRequest request, EwxEncryptMessageRequest encryptMessageRequest);
-
-
-    /**
-     * 校验CORP回调URL
-     * @param corpId
-     * @param secretEnum
-     * @param request
-     * @return
-     */
-    public String verifyCorpNotifyUrl(String corpId, EwxCorpSecretEnum secretEnum, EwxUrlVerifyRequest request);
-
-    /**
-     * 将Corp 回调消息路由到某个Corp上
-     * @param corpId
-     * @param secretEnum
-     * @param request
-     * @param encryptMessageRequest
-     * @return
-     */
-    public String routeCorpEvent(String corpId, EwxCorpSecretEnum secretEnum, EwxUrlVerifyRequest request, EwxEncryptMessageRequest encryptMessageRequest);
 
 
     /**
@@ -194,7 +157,7 @@ public interface EwxClient {
      * @param limit
      * @param timeout
      */
-    void getArchiveMsg(String corpId, int seq, int limit, int timeout);
+    List<EwxArchiveMsgBase> getArchiveMsg(String corpId, int seq, int limit, int timeout);
 
 
 }
