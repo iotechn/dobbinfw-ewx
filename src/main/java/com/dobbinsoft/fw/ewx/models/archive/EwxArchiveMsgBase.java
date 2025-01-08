@@ -10,7 +10,8 @@ import java.util.List;
 @Data
 public class EwxArchiveMsgBase {
 
-
+    // 已拉取序列
+    private Integer seq;
     @JsonProperty("msgid")
     private String msgid;
     @JsonProperty("action")

@@ -45,23 +45,33 @@ public class EwxEventProcessor implements ApplicationContextAware {
 
     /**
      *
-     * @param corpId
-     * @param agentId 当为企业事件时，此字段为空
+     * @param ewxAgent 当为企业事件时，此字段为空
      * @param requestBody
      * @return
      */
-    public String process(String corpId, String agentId, String requestBody) {
+    public String process(EwxCorp ewxCorp, EwxAgent ewxAgent, String requestBody) {
         EwxEventModel ewxEventModel = JacksonXmlUtil.parseObject(requestBody, EwxEventModel.class);
         if (ewxEventModel == null) {
             return "failed";
         }
         if ("event".equals(ewxEventModel.getMsgType())) {
             EwxEventType eventType = BaseEnums.getByCode(ewxEventModel.getEvent(), EwxEventType.class);
-            routeEvent(corpId, agentId, eventType, requestBody);
+            EwxEventsHandler ewxEventsHandler = handlerMap.get(eventType);
+            if (ewxEventsHandler == null) {
+                log.info("[EWX] 系统未关注回调事件:{}", eventType);
+                return "not event";
+            }
+            if (ewxCorp != null) {
+                ewxEventsHandler.handle(ewxCorp, requestBody);
+            }
+            if (ewxAgent != null) {
+                ewxEventsHandler.handle(ewxAgent, requestBody);
+            }
             return "success";
         }
         return "not event";
     }
+
 
 
     /**
@@ -91,12 +101,12 @@ public class EwxEventProcessor implements ApplicationContextAware {
      * @return
      */
     public String routeEvent(String corpId, String agentId, EwxCallbackEncryptRequest request, EwxEncryptMessageRequest encryptMessageRequest) {
-        EwxAgent ewxAgent = ewxClient.getAgent(corpId, agentId);
         try {
+            EwxAgent ewxAgent = ewxClient.getAgent(corpId, agentId);
             WXBizMsgCrypt wxBizMsgCrypt = new WXBizMsgCrypt(ewxAgent.getToken(), ewxAgent.getAesKey(), ewxAgent.getCorpId());
             String decryptXmlRequest = wxBizMsgCrypt.verifyAndDecrypt(request.getMsgSignature(), request.getTimestamp(), request.getNonce(), request.getEncryptStr());
             log.info("[EWX] 回调请求报文 request={}", decryptXmlRequest);
-            return this.process(corpId, agentId, decryptXmlRequest);
+            return this.process(null, ewxAgent, decryptXmlRequest);
         } catch (ServiceException e) {
             log.error("[EWX] 回调请求报文 异常 message={}, request={}", e.getMessage(), JacksonUtil.toJSONString(request));
             return e.getMessage();
@@ -153,20 +163,11 @@ public class EwxEventProcessor implements ApplicationContextAware {
             WXBizMsgCrypt wxBizMsgCrypt = new WXBizMsgCrypt(token, aesKey, corpId);
             String decryptXmlRequest = wxBizMsgCrypt.verifyAndDecrypt(request.getMsgSignature(), request.getTimestamp(), request.getNonce(), request.getEncryptStr());
             log.info("[EWX] 回调请求报文 request={}", decryptXmlRequest);
-            return this.process(corpId, null, decryptXmlRequest);
+            return this.process(ewxCorp, null, decryptXmlRequest);
         } catch (ServiceException e) {
             log.error("[EWX] 回调请求报文 异常 message={}, request={}", e.getMessage(), JacksonUtil.toJSONString(request));
             return e.getMessage();
         }
-    }
-
-    public void routeEvent(String corpId, String agentId, EwxEventType ewxEventType, String rawMessage) {
-        EwxEventsHandler ewxEventsHandler = handlerMap.get(ewxEventType);
-        if (ewxEventsHandler == null) {
-            log.info("[EWX] 系统未关注回调事件:{}", ewxEventType);
-            return;
-        }
-        ewxEventsHandler.handle(corpId, agentId, rawMessage);
     }
 
 

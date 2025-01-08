@@ -306,22 +306,27 @@ public class EwxClientImpl implements EwxClient {
                     switch (ewxArchiveMsgBase.getMsgtype()) {
                         case "text" -> {
                             EwxArchiveMsgText ewxArchiveMsgText = JacksonUtil.parseObject(plaintext, EwxArchiveMsgText.class);
+                            ewxArchiveMsgText.setSeq(chatData.getSeq());
                             result.add(ewxArchiveMsgText);
                         }
                         case "image" -> {
                             EwxArchiveMsgImage ewxArchiveMsgImage = JacksonUtil.parseObject(plaintext, EwxArchiveMsgImage.class);
+                            ewxArchiveMsgImage.setSeq(chatData.getSeq());
                             result.add(ewxArchiveMsgImage);
                         }
                         case "voice" -> {
                             EwxArchiveMsgVoice ewxArchiveMsgVoice = JacksonUtil.parseObject(plaintext, EwxArchiveMsgVoice.class);
+                            ewxArchiveMsgVoice.setSeq(chatData.getSeq());
                             result.add(ewxArchiveMsgVoice);
                         }
                         case "video" -> {
                             EwxArchiveMsgVideo ewxArchiveMsgVideo = JacksonUtil.parseObject(plaintext, EwxArchiveMsgVideo.class);
+                            ewxArchiveMsgVideo.setSeq(chatData.getSeq());
                             result.add(ewxArchiveMsgVideo);
                         }
                         case "location" -> {
                             EwxArchiveMsgLocation ewxArchiveMsgLocation = JacksonUtil.parseObject(plaintext, EwxArchiveMsgLocation.class);
+                            ewxArchiveMsgLocation.setSeq(chatData.getSeq());
                             result.add(ewxArchiveMsgLocation);
                         }
                         case null, default ->
