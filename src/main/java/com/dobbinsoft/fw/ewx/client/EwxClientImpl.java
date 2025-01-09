@@ -8,6 +8,8 @@ import com.dobbinsoft.fw.ewx.models.EwxCorp;
 import com.dobbinsoft.fw.ewx.models.archive.*;
 import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentAttr;
 import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentListAttr;
+import com.dobbinsoft.fw.ewx.models.jssdk.EwxJsSdkApiTicket;
+import com.dobbinsoft.fw.ewx.models.jssdk.EwxJsSdkConfigAgentResult;
 import com.dobbinsoft.fw.ewx.models.login.EwxMpLogin;
 import com.dobbinsoft.fw.ewx.models.login.EwxQrLogin;
 import com.dobbinsoft.fw.ewx.models.message.EwxEnterpriseMessageAttr;
@@ -17,8 +19,11 @@ import com.dobbinsoft.fw.ewx.models.token.EwxAccessToken;
 import com.dobbinsoft.fw.ewx.models.user.*;
 import com.dobbinsoft.fw.ewx.utils.RSAEncrypt;
 import com.dobbinsoft.fw.support.utils.CollectionUtils;
+import com.dobbinsoft.fw.support.utils.DigestUtils;
 import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.dobbinsoft.fw.support.utils.StringUtils;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.tencent.wework.Finance;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.MediaType;
@@ -30,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class EwxClientImpl implements EwxClient {
@@ -45,6 +51,10 @@ public class EwxClientImpl implements EwxClient {
     private final Map<String, EwxCorp> corpMap = new ConcurrentHashMap<>();
     // Key corpId + "---" + archiveSecret, value: sdk id
     private final Map<String, Long> archiveSdkMap = new ConcurrentHashMap<>();
+
+    // Key corpId + "---" + agentId 7200秒
+    private final Cache<String, String> jsSdkTicketCache =
+            Caffeine.newBuilder().expireAfterWrite(6200, TimeUnit.SECONDS).build();;
 
 
     @Override
@@ -164,12 +174,6 @@ public class EwxClientImpl implements EwxClient {
 
     private String concatCacheKey(String corpId, String agentId) {
         return corpId + "---" + agentId;
-    }
-
-    @Override
-    public EwxAccessToken getAccessToken(String corpId, String agentId, String corpSecret) {
-        EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
-        return proxyGet(EwxConst.ACCESS_TOKEN_GET_URL.formatted(corpId, corpSecret), ewxAgent, EwxAccessToken.class);
     }
 
     @Override
@@ -344,4 +348,38 @@ public class EwxClientImpl implements EwxClient {
         }
     }
 
+    @Override
+    public EwxJsSdkConfigAgentResult getJsSdkAgentConfig(String corpId, String agentId, String toSignUrl) {
+        String key = concatCacheKey(corpId, agentId);
+        EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
+        String url = EwxConst.GET_JSAPI_TICKET.formatted(getEwxToken(corpId,agentId).getAccessToken());
+        String ticket = jsSdkTicketCache.get(key, k -> {
+            EwxJsSdkApiTicket ewxJsSdkApiTicket = proxyGet(url, ewxAgent, EwxJsSdkApiTicket.class);
+            return ewxJsSdkApiTicket.getTicket();
+        });
+        String timestamp = String.valueOf(System.currentTimeMillis() / 1000L);
+        String nonceStr = StringUtils.uuid();
+
+        String toSignStr = (
+            "jsapi_ticket=%s" +
+            "&noncestr=%s" +
+            "&timestamp=%s" +
+            "&url=%s"
+        ).formatted(ticket, nonceStr, timestamp, nonceStr);
+        String sign = DigestUtils.sha1Hex(toSignStr);
+        EwxJsSdkConfigAgentResult agentResult = new EwxJsSdkConfigAgentResult();
+        agentResult.setCorpId(corpId);
+        agentResult.setAgentId(agentId);
+        agentResult.setTimestamp(timestamp);
+        agentResult.setNonceStr(nonceStr);
+        agentResult.setSignature(sign);
+        return agentResult;
+    }
+
+    @Override
+    public EwxOAuthResponse oauthUserInfo(String corpId, String agentId, String code) {
+        EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
+        String url = EwxConst.OAUTH_CODE_TO_USER_ID.formatted(getEwxToken(corpId,agentId).getAccessToken(), code);
+        return proxyGet(url, ewxAgent, EwxOAuthResponse.class);
+    }
 }

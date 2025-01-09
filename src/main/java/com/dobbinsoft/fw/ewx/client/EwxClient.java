@@ -5,16 +5,14 @@ import com.dobbinsoft.fw.ewx.models.EwxCorp;
 import com.dobbinsoft.fw.ewx.models.archive.EwxArchiveMsgBase;
 import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentAttr;
 import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentListAttr;
+import com.dobbinsoft.fw.ewx.models.jssdk.EwxJsSdkConfigAgentResult;
 import com.dobbinsoft.fw.ewx.models.login.EwxMpLogin;
 import com.dobbinsoft.fw.ewx.models.login.EwxQrLogin;
 import com.dobbinsoft.fw.ewx.models.message.EwxEnterpriseMessageAttr;
 import com.dobbinsoft.fw.ewx.models.message.EwxEnterpriseMessageRequest;
 import com.dobbinsoft.fw.ewx.models.tag.EwxCorpTagAttr;
 import com.dobbinsoft.fw.ewx.models.token.EwxAccessToken;
-import com.dobbinsoft.fw.ewx.models.user.EwxExternalContactDetailAttr;
-import com.dobbinsoft.fw.ewx.models.user.EwxExternalContactIdAttr;
-import com.dobbinsoft.fw.ewx.models.user.EwxUser;
-import com.dobbinsoft.fw.ewx.models.user.EwxUserDetailAttr;
+import com.dobbinsoft.fw.ewx.models.user.*;
 
 import java.util.List;
 import java.util.Map;
@@ -64,14 +62,6 @@ public interface EwxClient {
      */
     public EwxUser getUser(String corpId, String agentId, String userId);
 
-
-    /**
-     * 获取access_token
-     * @param corpId 企业ID
-     * @param corpSecret 应用的凭证密钥
-     * @return
-     */
-    public EwxAccessToken getAccessToken(String corpId, String agentId, String corpSecret);
 
     /**
      * 获取部门列表
@@ -159,5 +149,23 @@ public interface EwxClient {
      */
     List<EwxArchiveMsgBase> getArchiveMsg(String corpId, int seq, int limit, int timeout);
 
+
+    /**
+     * 针对H5页面 获取其JSSDK配置
+     * @param corpId
+     * @param agentId
+     * @param toSignUrl 待签名URL
+     * @return
+     */
+    EwxJsSdkConfigAgentResult getJsSdkAgentConfig(String corpId, String agentId, String toSignUrl);
+
+    /**
+     * 从OAuth的Code中获取用户ID
+     * @param corpId
+     * @param agentId
+     * @param code
+     * @return
+     */
+    EwxOAuthResponse oauthUserInfo(String corpId, String agentId, String code);
 
 }
