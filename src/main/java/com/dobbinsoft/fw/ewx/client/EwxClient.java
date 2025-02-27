@@ -5,6 +5,9 @@ import com.dobbinsoft.fw.ewx.models.EwxCorp;
 import com.dobbinsoft.fw.ewx.models.archive.EwxArchiveMsgBase;
 import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentAttr;
 import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentListAttr;
+import com.dobbinsoft.fw.ewx.models.external.EwxExternalContactDetailAttr;
+import com.dobbinsoft.fw.ewx.models.external.EwxExternalContactDetailListAttr;
+import com.dobbinsoft.fw.ewx.models.external.EwxExternalContactIdAttr;
 import com.dobbinsoft.fw.ewx.models.jssdk.EwxJsSdkConfigAgentResult;
 import com.dobbinsoft.fw.ewx.models.login.EwxMpLogin;
 import com.dobbinsoft.fw.ewx.models.login.EwxQrLogin;
@@ -102,13 +105,22 @@ public interface EwxClient {
 
 
     /**
+     * 获取外部联系人详情
+     * @param corpId
+     * @param agentId
+     * @param externalContactId
+     * @return
+     */
+    public EwxExternalContactDetailAttr getExternalContact(String corpId, String agentId, String externalContactId);
+
+    /**
      * 获取客户列表
      * @param corpId
      * @param agentId
      * @param userId 企业成员的userid
      * @return
      */
-    public EwxExternalContactIdAttr getExternalContactList(String corpId, String agentId, String  userId);
+    public EwxExternalContactIdAttr getExternalContactList(String corpId, String agentId, String userId);
 
     /**
      * 批量获取客户详情
@@ -119,7 +131,7 @@ public interface EwxClient {
      * @param limit
      * @return
      */
-    public EwxExternalContactDetailAttr getExternalContactDetailList(String corpId, String agentId,  String[]  userId, String cursor,int limit);
+    public EwxExternalContactDetailListAttr getExternalContactDetailList(String corpId, String agentId, String[]  userId, String cursor, int limit);
 
 
     /**

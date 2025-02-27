@@ -24,8 +24,9 @@ public class EwxConst {
     public static final String DEPARTMENT_SIMPLE_LIST_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/department/simplelist?access_token=%s";
     public static final String DEPARTMENT_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/department/get?access_token=%s&id=%s";
     public static final String DEPARTMENT_USER_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/user/list?access_token=%s&department_id=%s";
-    public static final String EXTERNAL_CONTACT_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/externalcontact/list?access_token=%s&userid=%s";
-    public static final String EXTERNAL_CONTACT_LIST_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/externalcontact/batch/get_by_user?access_token=%s";
+    public static final String EXTERNAL_CONTACT_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/externalcontact/get?access_token=%s&external_userid=%s";
+    public static final String EXTERNAL_CONTACT_LIST_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/externalcontact/list?access_token=%s&userid=%s";
+    public static final String EXTERNAL_CONTACT_LIST_GET_BY_USER_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/externalcontact/batch/get_by_user?access_token=%s";
     public static final String CORP_TAG_LIST_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/externalcontact/get_corp_tag_list?access_token=%s";
     public static final String ADD_MSG_TEMPLATE_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/externalcontact/add_msg_template?access_token=%s";
     public static final String GET_JSAPI_TICKET = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/get_jsapi_ticket?access_token=%s";

@@ -8,6 +8,10 @@ import com.dobbinsoft.fw.ewx.models.EwxCorp;
 import com.dobbinsoft.fw.ewx.models.archive.*;
 import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentAttr;
 import com.dobbinsoft.fw.ewx.models.dept.EwxDepartmentListAttr;
+import com.dobbinsoft.fw.ewx.models.external.EwxExternalContactDetailAttr;
+import com.dobbinsoft.fw.ewx.models.external.EwxExternalContactDetailListAttr;
+import com.dobbinsoft.fw.ewx.models.external.EwxExternalContactIdAttr;
+import com.dobbinsoft.fw.ewx.models.external.EwxExternalRequest;
 import com.dobbinsoft.fw.ewx.models.jssdk.EwxJsSdkApiTicket;
 import com.dobbinsoft.fw.ewx.models.jssdk.EwxJsSdkConfigAgentResult;
 import com.dobbinsoft.fw.ewx.models.login.EwxMpLogin;
@@ -211,21 +215,28 @@ public class EwxClientImpl implements EwxClient {
     }
 
     @Override
-    public EwxExternalContactIdAttr getExternalContactList(String corpId, String agentId,  String userId) {
+    public EwxExternalContactDetailAttr getExternalContact(String corpId, String agentId, String externalContactId) {
         EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
-        String url=EwxConst.EXTERNAL_CONTACT_GET_URL.formatted(getEwxToken(corpId,agentId).getAccessToken(),userId);
+        String url = EwxConst.EXTERNAL_CONTACT_GET_URL.formatted(getEwxToken(corpId, agentId).getAccessToken(), externalContactId);
+        return proxyGet(url, ewxAgent, EwxExternalContactDetailAttr.class);
+    }
+
+    @Override
+    public EwxExternalContactIdAttr getExternalContactList(String corpId, String agentId, String userId) {
+        EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
+        String url=EwxConst.EXTERNAL_CONTACT_LIST_GET_URL.formatted(getEwxToken(corpId,agentId).getAccessToken(),userId);
         return proxyGet(url, ewxAgent, EwxExternalContactIdAttr.class);
     }
 
     @Override
-    public EwxExternalContactDetailAttr getExternalContactDetailList(String corpId, String agentId, String[] userId, String cursor, int limit) {
+    public EwxExternalContactDetailListAttr getExternalContactDetailList(String corpId, String agentId, String[] userId, String cursor, int limit) {
         EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
-        String url=EwxConst.EXTERNAL_CONTACT_LIST_GET_URL.formatted(getEwxToken(corpId,agentId).getAccessToken());
+        String url=EwxConst.EXTERNAL_CONTACT_LIST_GET_BY_USER_URL.formatted(getEwxToken(corpId,agentId).getAccessToken());
         EwxExternalRequest request = new EwxExternalRequest();
         request.setUserid_list(Arrays.asList(userId));
         request.setCursor(cursor);
         request.setLimit(limit);
-        return proxyPost(url,ewxAgent,request,EwxExternalContactDetailAttr.class);
+        return proxyPost(url,ewxAgent,request, EwxExternalContactDetailListAttr.class);
     }
 
 

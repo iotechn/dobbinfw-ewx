@@ -1,4 +1,4 @@
-package com.dobbinsoft.fw.ewx.models.user;
+package com.dobbinsoft.fw.ewx.models.external;
 
 import com.dobbinsoft.fw.ewx.models.EwxBaseModel;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -58,7 +58,7 @@ public class EwxEventProcessor implements ApplicationContextAware {
             EwxEventType eventType = BaseEnums.getByCode(ewxEventModel.getEvent(), EwxEventType.class);
             EwxEventsHandler ewxEventsHandler = handlerMap.get(eventType);
             if (ewxEventsHandler == null) {
-                log.info("[EWX] 系统未关注回调事件:{}", eventType);
+                log.info("[EWX] 系统未关注回调事件:{}", ewxEventModel.getEvent());
                 return "not event";
             }
             if (ewxCorp != null) {

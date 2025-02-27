@@ -1,6 +1,10 @@
-package com.dobbinsoft.fw.ewx.models.user;
+package com.dobbinsoft.fw.ewx.models.external;
 
 import com.dobbinsoft.fw.ewx.models.EwxBaseModel;
+import com.dobbinsoft.fw.ewx.models.user.EwxUserExternalMiniprogram;
+import com.dobbinsoft.fw.ewx.models.user.EwxUserExternalText;
+import com.dobbinsoft.fw.ewx.models.user.EwxUserExternalWeb;
+import com.dobbinsoft.fw.ewx.models.user.EwxUserWechatChannel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -9,7 +13,7 @@ import java.io.Serializable;
 import java.util.List;
 
 @Data
-public class EwxExternalContactDetailAttr extends EwxBaseModel implements Serializable {
+public class EwxExternalContactDetailListAttr extends EwxBaseModel implements Serializable {
     @Serial
     private static final long serialVersionUID = -1992663324207669440L;
 
