@@ -1,5 +1,6 @@
 package com.dobbinsoft.fw.ewx.client;
 
+import com.dobbinsoft.fw.ewx.enums.EwxJsTicketEnum;
 import com.dobbinsoft.fw.ewx.models.EwxAgent;
 import com.dobbinsoft.fw.ewx.models.EwxCorp;
 import com.dobbinsoft.fw.ewx.models.archive.EwxArchiveMsgBase;
@@ -167,9 +168,21 @@ public interface EwxClient {
      * @param corpId
      * @param agentId
      * @param toSignUrl 待签名URL
+     * @param ticketEnum
      * @return
      */
-    EwxJsSdkConfigAgentResult getJsSdkAgentConfig(String corpId, String agentId, String toSignUrl);
+    EwxJsSdkConfigAgentResult getJsSdkConfig(String corpId, String agentId, String toSignUrl, EwxJsTicketEnum ticketEnum);
+
+    /**
+     * 获取H5 OAuth URL
+     * @param corpId
+     * @param agentId
+     * @param redirectURI
+     * @param state
+     * @param scope snsapi_privateinfo | snsapi_base
+     * @return
+     */
+    String getAgentOauthUrl(String corpId, String agentId, String redirectURI, String state, String scope);
 
     /**
      * 从OAuth的Code中获取用户ID

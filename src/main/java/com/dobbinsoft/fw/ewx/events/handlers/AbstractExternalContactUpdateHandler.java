@@ -1,20 +1,15 @@
 package com.dobbinsoft.fw.ewx.events.handlers;
 
-import com.dobbinsoft.fw.ewx.client.EwxClient;
 import com.dobbinsoft.fw.ewx.events.EwxEventType;
 import com.dobbinsoft.fw.ewx.events.EwxEventsHandler;
 import com.dobbinsoft.fw.ewx.events.model.EwxExternalContactUpdateEvent;
 import com.dobbinsoft.fw.ewx.models.EwxAgent;
 import com.dobbinsoft.fw.ewx.models.EwxCorp;
 import com.dobbinsoft.fw.support.utils.JacksonXmlUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Objects;
 
 public abstract class AbstractExternalContactUpdateHandler implements EwxEventsHandler {
-
-    @Autowired
-    private EwxClient ewxClient;
 
     @Override
     public EwxEventType type() {
@@ -27,7 +22,7 @@ public abstract class AbstractExternalContactUpdateHandler implements EwxEventsH
         if (Objects.isNull(ewxUserUpdateEvent)) {
             return;
         }
-
+        handle(ewxAgent, ewxUserUpdateEvent);
     }
 
     @Override

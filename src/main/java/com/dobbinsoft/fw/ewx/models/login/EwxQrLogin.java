@@ -9,6 +9,10 @@ import lombok.NoArgsConstructor;
 @Data
 public class EwxQrLogin extends EwxBaseModel {
 
-    @JsonProperty("userid")
+    @JsonProperty("UserId")
     private String userid;
+
+    @JsonProperty("DeviceId")
+    private String deviceId;
+
 }

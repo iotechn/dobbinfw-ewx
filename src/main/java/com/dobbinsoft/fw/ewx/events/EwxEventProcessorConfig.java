@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 public class EwxEventProcessorConfig {
 
     @Bean("ewxEventHandleRouter")
-    public Map<EwxEventType, EwxEventsHandler> ewxEventHandleRouter(List<EwxEventsHandler> ewxEventsHandlers) {
-        return ewxEventsHandlers.stream().collect(Collectors.toMap(EwxEventsHandler::type, v -> v));
+    public Map<EwxEventType, List<EwxEventsHandler>> ewxEventHandleRouter(List<EwxEventsHandler> ewxEventsHandlers) {
+        return ewxEventsHandlers.stream().collect(Collectors.groupingBy(EwxEventsHandler::type));
     }
 
     @Bean

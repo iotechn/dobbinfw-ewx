@@ -4,6 +4,8 @@ public class EwxConst {
 
     public static final String EWX_BASE_DEFAULT_URL = "https://qyapi.weixin.qq.com";
 
+    public static final String EWX_OPEN_PLATFORM_DEFAULT_URL = "https://open.weixin.qq.com";
+
     public static final String EWX_BASE_URL_PLACEHOLDER = "{{EWX_BASE_URL_PLACEHOLDER}}";
 
     public static final String EWX_ACCESS_TOKEN_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/gettoken?corpid=%s&corpsecret=%s";
@@ -29,7 +31,9 @@ public class EwxConst {
     public static final String EXTERNAL_CONTACT_LIST_GET_BY_USER_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/externalcontact/batch/get_by_user?access_token=%s";
     public static final String CORP_TAG_LIST_GET_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/externalcontact/get_corp_tag_list?access_token=%s";
     public static final String ADD_MSG_TEMPLATE_URL = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/externalcontact/add_msg_template?access_token=%s";
+    // JSAPI_TICKET 和 AGENT_JSAPI_TICKET 区别参考 https://developer.work.weixin.qq.com/document/path/96909
     public static final String GET_JSAPI_TICKET = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/get_jsapi_ticket?access_token=%s";
+    public static final String GET_AGENT_JSAPI_TICKET = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/ticket/get?access_token=%s&type=agent_config";
     public static final String OAUTH_CODE_TO_USER_ID = EWX_BASE_URL_PLACEHOLDER + "/cgi-bin/auth/getuserinfo?access_token=%s&code=%s";
-
+    public static final String OAUTH_URL = EWX_OPEN_PLATFORM_DEFAULT_URL + "/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&agentid=%s#wechat_redirect";
 }

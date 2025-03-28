@@ -10,6 +10,7 @@ import com.dobbinsoft.fw.ewx.models.EwxCorp;
 import com.dobbinsoft.fw.ewx.models.event.EwxCallbackEncryptRequest;
 import com.dobbinsoft.fw.ewx.models.event.EwxEncryptMessageRequest;
 import com.dobbinsoft.fw.ewx.utils.WXBizMsgCrypt;
+import com.dobbinsoft.fw.support.utils.CollectionUtils;
 import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.dobbinsoft.fw.support.utils.JacksonXmlUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -21,23 +22,27 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
 public class EwxEventProcessor implements ApplicationContextAware {
 
 
-    private Map<EwxEventType, EwxEventsHandler> handlerMap;
+    private Map<EwxEventType, List<EwxEventsHandler>> handlerMap;
 
     @Autowired
     private EwxClient ewxClient;
+
+    @Autowired(required = false)
+    private EwxEventBeforeHandle ewxEventBeforeHandle;
 
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
         Object ewxEventHandleRouter = applicationContext.getBean("ewxEventHandleRouter");
         if (ewxEventHandleRouter instanceof Map) {
-            this.handlerMap = (Map<EwxEventType, EwxEventsHandler>) ewxEventHandleRouter;
+            this.handlerMap = (Map<EwxEventType, List<EwxEventsHandler>>) ewxEventHandleRouter;
         } else {
             this.handlerMap = Collections.emptyMap();
         }
@@ -56,16 +61,36 @@ public class EwxEventProcessor implements ApplicationContextAware {
         }
         if ("event".equals(ewxEventModel.getMsgType())) {
             EwxEventType eventType = BaseEnums.getByCode(ewxEventModel.getEvent(), EwxEventType.class);
-            EwxEventsHandler ewxEventsHandler = handlerMap.get(eventType);
-            if (ewxEventsHandler == null) {
+            List<EwxEventsHandler> ewxEventsHandlers = handlerMap.get(eventType);
+            if (CollectionUtils.isEmpty(ewxEventsHandlers)) {
                 log.info("[EWX] 系统未关注回调事件:{}", ewxEventModel.getEvent());
                 return "not event";
             }
-            if (ewxCorp != null) {
-                ewxEventsHandler.handle(ewxCorp, requestBody);
-            }
-            if (ewxAgent != null) {
-                ewxEventsHandler.handle(ewxAgent, requestBody);
+            for (EwxEventsHandler ewxEventsHandler : ewxEventsHandlers) {
+                if (ewxCorp != null) {
+                    if (ewxEventBeforeHandle != null) {
+                        ewxEventBeforeHandle.handle(ewxCorp, requestBody, eventType);
+                    }
+                    try {
+                        ewxEventsHandler.handle(ewxCorp, requestBody);
+                    } finally {
+                        if (ewxEventBeforeHandle != null) {
+                            ewxEventBeforeHandle.handleFinally(ewxCorp, requestBody, eventType);
+                        }
+                    }
+                }
+                if (ewxAgent != null) {
+                    if (ewxEventBeforeHandle != null) {
+                        ewxEventBeforeHandle.handle(ewxAgent, requestBody, eventType);
+                    }
+                    try {
+                        ewxEventsHandler.handle(ewxAgent, requestBody);
+                    } finally {
+                        if (ewxEventBeforeHandle != null) {
+                            ewxEventBeforeHandle.handleFinally(ewxAgent, requestBody, eventType);
+                        }
+                    }
+                }
             }
             return "success";
         }

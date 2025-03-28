@@ -37,6 +37,7 @@ public class EwxExternalContactUpdateEvent {
 
 
     public enum ChangeType {
+        msg_audit_approved,
         add_external_contact, // 添加企业客户事件
         edit_external_contact, // 编辑企业客户事件
         add_half_external_contact, // 外部联系人免验证添加成员事件

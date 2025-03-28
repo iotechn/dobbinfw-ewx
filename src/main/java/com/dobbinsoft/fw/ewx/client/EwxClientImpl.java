@@ -2,6 +2,7 @@ package com.dobbinsoft.fw.ewx.client;
 
 import com.dobbinsoft.fw.ewx.EwxConst;
 import com.dobbinsoft.fw.ewx.cache.EwxCache;
+import com.dobbinsoft.fw.ewx.enums.EwxJsTicketEnum;
 import com.dobbinsoft.fw.ewx.exception.EwxException;
 import com.dobbinsoft.fw.ewx.models.EwxAgent;
 import com.dobbinsoft.fw.ewx.models.EwxCorp;
@@ -37,6 +38,8 @@ import okhttp3.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -58,7 +61,7 @@ public class EwxClientImpl implements EwxClient {
 
     // Key corpId + "---" + agentId 7200秒
     private final Cache<String, String> jsSdkTicketCache =
-            Caffeine.newBuilder().expireAfterWrite(6200, TimeUnit.SECONDS).build();;
+            Caffeine.newBuilder().expireAfterWrite(6200, TimeUnit.SECONDS).build();
 
 
     @Override
@@ -360,11 +363,13 @@ public class EwxClientImpl implements EwxClient {
     }
 
     @Override
-    public EwxJsSdkConfigAgentResult getJsSdkAgentConfig(String corpId, String agentId, String toSignUrl) {
+    public EwxJsSdkConfigAgentResult getJsSdkConfig(String corpId, String agentId, String toSignUrl, EwxJsTicketEnum ticketEnum) {
         String key = concatCacheKey(corpId, agentId);
-        EwxAgent ewxAgent = agentMap.get(concatCacheKey(corpId, agentId));
-        String url = EwxConst.GET_JSAPI_TICKET.formatted(getEwxToken(corpId,agentId).getAccessToken());
-        String ticket = jsSdkTicketCache.get(key, k -> {
+        EwxAgent ewxAgent = agentMap.get(key);
+        String cacheKey = key + "_" + ticketEnum.getCode();
+        String url = (ticketEnum == EwxJsTicketEnum.CORP ? EwxConst.GET_JSAPI_TICKET : EwxConst.GET_AGENT_JSAPI_TICKET)
+                .formatted(getEwxToken(corpId,agentId).getAccessToken());
+        String ticket = jsSdkTicketCache.get(cacheKey, k -> {
             EwxJsSdkApiTicket ewxJsSdkApiTicket = proxyGet(url, ewxAgent, EwxJsSdkApiTicket.class);
             return ewxJsSdkApiTicket.getTicket();
         });
@@ -376,7 +381,7 @@ public class EwxClientImpl implements EwxClient {
             "&noncestr=%s" +
             "&timestamp=%s" +
             "&url=%s"
-        ).formatted(ticket, nonceStr, timestamp, nonceStr);
+        ).formatted(ticket, nonceStr, timestamp, toSignUrl);
         String sign = DigestUtils.sha1Hex(toSignStr);
         EwxJsSdkConfigAgentResult agentResult = new EwxJsSdkConfigAgentResult();
         agentResult.setCorpId(corpId);
@@ -385,6 +390,16 @@ public class EwxClientImpl implements EwxClient {
         agentResult.setNonceStr(nonceStr);
         agentResult.setSignature(sign);
         return agentResult;
+    }
+
+    @Override
+    public String getAgentOauthUrl(String corpId, String agentId, String redirectURI, String state, String scope) {
+        return EwxConst.OAUTH_URL.formatted(
+                corpId,
+                URLEncoder.encode(redirectURI, StandardCharsets.UTF_8),
+                scope,
+                state,
+                String.valueOf(agentId));
     }
 
     @Override
